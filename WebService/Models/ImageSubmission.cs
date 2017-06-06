@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Web;
 
 namespace WebService.Models
@@ -35,11 +36,16 @@ namespace WebService.Models
         }
     }
 
+    [DataContract(Name = "ImageSubmission")]
     public class ImageSubmissionDTO
     {
+        [DataMember]
         public int ImageID { get; set; }
+        [DataMember]
         public int ItemID { get; set; }
+        [DataMember]
         public Boolean VerificationResult { get; set; }
+        [DataMember]
         public List<string> Labels { get; set; }
 
         internal ImageSubmissionDTO(ImageSubmission imageSubmission)

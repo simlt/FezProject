@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Web;
+using System.Runtime.Serialization;
 
 namespace WebService.Models
 {
-    // The item requested to be searched
+    // The requested item to be searched
     public class Item
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -18,13 +18,31 @@ namespace WebService.Models
             get { return String.Join(",", _labels); }
             set { _labels = value.Split(',').ToList(); }
         }
-        // TODO maybe add categories?
+        public int Points { get; set; }
 
         private List<string> _labels = new List<string>();
         public List<string> Labels
         {
             get { return _labels; }
             set { _labels = value; }
+        }
+    }
+
+    [DataContract(Name="Item")]
+    public class ItemDTO
+    {
+        [DataMember]
+        public int ItemID { get; set; }
+        [DataMember]
+        public string Name { get; set; }
+        [DataMember]
+        public int Points { get; set; }
+
+        internal ItemDTO(Item item)
+        {
+            ItemID = item.ItemID;
+            Name = item.Name;
+            Points = item.Points;
         }
     }
 }

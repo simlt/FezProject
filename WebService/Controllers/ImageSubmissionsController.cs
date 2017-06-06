@@ -22,17 +22,17 @@ namespace WebService.Controllers
         private WebServiceContext db = new WebServiceContext();
 
         // GET: api/ImageSubmissions
-        [Route(Name = "GetImageSubmission")]
-        public IQueryable<ImageSubmission> GetImageSubmissions()
+        public IEnumerable<ImageSubmissionDTO> GetImageSubmissions()
         {
-            return db.ImageSubmissions;
+            return db.ImageSubmissions.AsEnumerable().Select(i => new ImageSubmissionDTO(i));
         }
 
         // GET: api/ImageSubmissions/5
-        [ResponseType(typeof(ImageSubmission))]
+        [Route("{id:int}", Name = "GetImageSubmissionFromId")]
+        [ResponseType(typeof(ImageSubmissionDTO))]
         public async Task<IHttpActionResult> GetImageSubmission(int id)
         {
-            ImageSubmission imageSubmission = await db.ImageSubmissions.FindAsync(id);
+            var imageSubmission = await db.ImageSubmissions.ToAsyncEnumerable().Select(i => new ImageSubmissionDTO(i)).SingleOrDefault(i => i.ImageID == id);
             if (imageSubmission == null)
             {
                 return NotFound();
@@ -153,7 +153,7 @@ namespace WebService.Controllers
             var dto = new ImageSubmissionDTO(imageSubmission);
 
             // Return true if the image matches a label
-            return CreatedAtRoute("GetImageSubmission", new { id = imageSubmission.ImageID }, dto);
+            return CreatedAtRoute("GetImageSubmissionFromId", new { id = imageSubmission.ImageID }, dto);
         }
 
         // DELETE: api/ImageSubmissions/5

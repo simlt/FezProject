@@ -18,16 +18,16 @@ namespace WebService.Controllers
         private WebServiceContext db = new WebServiceContext();
 
         // GET: api/Items
-        public IQueryable<Item> GetItems()
+        public IEnumerable<ItemDTO> GetItems()
         {
-            return db.Items;
+            return db.Items.AsEnumerable().Select(item => new ItemDTO(item));
         }
 
         // GET: api/Items/5
-        [ResponseType(typeof(Item))]
+        [ResponseType(typeof(ItemDTO))]
         public async Task<IHttpActionResult> GetItem(int id)
         {
-            Item item = await db.Items.FindAsync(id);
+            var item = await db.Items.ToAsyncEnumerable().Select(i => new ItemDTO(i)).SingleOrDefault(i => i.ItemID == id);
             if (item == null)
             {
                 return NotFound();
@@ -72,7 +72,7 @@ namespace WebService.Controllers
         }*/
 
         // POST: api/Items
-        [ResponseType(typeof(Item))]
+        /*[ResponseType(typeof(Item))]
         public async Task<IHttpActionResult> PostItem(Item item)
         {
             if (!ModelState.IsValid)
@@ -84,7 +84,7 @@ namespace WebService.Controllers
             await db.SaveChangesAsync();
 
             return CreatedAtRoute("FezAPI", new { id = item.ItemID }, item);
-        }
+        }*/
 
         // DELETE: api/Items/5
         /*[ResponseType(typeof(Item))]

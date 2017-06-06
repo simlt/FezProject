@@ -13,10 +13,12 @@ using GT = Gadgeteer;
 using GTM = Gadgeteer.Modules;
 using Gadgeteer.Modules.GHIElectronics;
 
-namespace GadgeteerApp6
+namespace GadgeteerApp
 {
     public partial class Program
     {
+        WebServiceClient client = null;
+
         // This method is run when the mainboard is powered up or reset.   
         void ProgramStarted()
         {
@@ -33,22 +35,26 @@ namespace GadgeteerApp6
                 timer.Start();
             *******************************************************************************************/
             button.ButtonPressed += new Button.ButtonEventHandler(button_ButtonPressed);
-            button2.ButtonPressed += new Button.ButtonEventHandler(button_ButtonPressed);
             camera.PictureCaptured += new Camera.PictureCapturedEventHandler(camera_PictureCaptured);
+
+            // Setup network
+            var network = new Network();
+            network.Setup(ethernet);
+
+            // Create new WebServiceClient
+            client = new WebServiceClient("192.168.1.102:50722");
+
             // Use Debug.Print to show messages in Visual Studio's "Output" window during debugging.
             Debug.Print("Program Started");
         }
 
         void camera_PictureCaptured(Camera sender, GT.Picture immagine)
         {
-            displayT35.SimpleGraphics.DisplayImage(immagine, 5, 5);
+            displayT35.SimpleGraphics.DisplayImage(immagine, 0, 0);
+            client.submitImage(1, immagine.MakeBitmap());
         }   
 
         void button_ButtonPressed(Button sender, Button.ButtonState state)
-        {
-            camera.TakePicture();
-        }
-        void button2_ButtonPressed(Button sender, Button.ButtonState state)
         {
             camera.TakePicture();
         }
