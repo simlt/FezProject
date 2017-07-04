@@ -55,7 +55,7 @@
           <moduleHasSocketUses Id="8927aa83-9bfe-4c8d-ac76-335afa0aeef5">
             <socketUse Id="91c91e81-78e0-4deb-8ab8-a0f1b09ff9ac" label="XY">
               <socket>
-                <socketUseReferencesSocket Id="d5abe93e-2296-40c0-b980-a3dbf0fecc55">
+                <socketUseReferencesSocket Id="93b90695-ee4c-4719-b417-7684a01dfe37">
                   <socketMoniker Id="a67d0d81-60c7-4271-b2a0-2e8778d90036" />
                 </socketUseReferencesSocket>
               </socket>
@@ -94,7 +94,7 @@
           <moduleHasSocketUses Id="54db9258-b258-49d1-989a-244b46678756">
             <socketUse Id="0b598176-a084-4119-b858-3b76c2151154" label="G">
               <socket>
-                <socketUseReferencesSocket Id="1ba159e3-8412-44df-87b0-906e5007637f">
+                <socketUseReferencesSocket Id="cf506786-2b96-40ce-8afe-11b4515d7482">
                   <socketMoniker Id="22261fe6-9b6f-4e82-9dbd-d6aa30978b6b" />
                 </socketUseReferencesSocket>
               </socket>

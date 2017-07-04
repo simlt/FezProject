@@ -17,7 +17,7 @@ namespace WebService.Models
         public string Description { get; set; }*/
         [Required]
         public byte[] Image { get; set; }
-        public Boolean VerificationResult { get; set; }
+        public bool VerificationResult { get; set; }
         public string LabelsAsString
         {
             get { return String.Join(",", _labels); }
@@ -44,7 +44,7 @@ namespace WebService.Models
         [DataMember]
         public int ItemID { get; set; }
         [DataMember]
-        public Boolean VerificationResult { get; set; }
+        public bool VerificationResult { get; set; }
         [DataMember]
         public List<string> Labels { get; set; }
 

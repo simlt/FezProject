@@ -108,23 +108,29 @@ namespace WebService.Controllers
         [ResponseType(typeof(ImageSubmissionDTO))]
         public async Task<IHttpActionResult> Submit(int ItemId)
         {
-            if (!db.Items.Any(i => i.ItemID == ItemId))
+            Item item = null;
+            try
+            {
+                item = db.Items.Single(i => i.ItemID == ItemId);
+            }
+            catch
             {
                 return BadRequest("Can't upload image for a non-existing item.");
             }
-            if (Request.Content.Headers.ContentType.MediaType != "image/png")
+            if (Request.Content.Headers.ContentType.MediaType != "image/bmp")
             {
-                return Content(HttpStatusCode.UnsupportedMediaType, "Only png images are supported.");
+                return Content(HttpStatusCode.UnsupportedMediaType, "Only bitmap images are supported.");
             }
 
             var imageSubmission = new ImageSubmission();
             imageSubmission.ItemID = ItemId;
+            imageSubmission.Item = item;
             imageSubmission.Image = await Request.Content.ReadAsByteArrayAsync();
             //var image = Image.FromStream(data.GetStream(Request.Content, Request.Content.Headers));
             var image = Image.FromBytes(imageSubmission.Image);
 
             // ### QUERY Google Cloud Service
-            /*try
+            try
             {
                 var client = ImageAnnotatorClient.Create();
                 var response = client.DetectLabels(image);
@@ -140,11 +146,11 @@ namespace WebService.Controllers
                             imageSubmission.VerificationResult = true;
                     }
                 }
-            /*}
+            }
             catch (Exception e)
             {
-                return InternalServerError("Could not successfully parse the image on Google Cloud.\n" + e.Message);
-            }*/
+                return InternalServerError(new Exception("Could not successfully parse the image on Google Cloud.\n" + e.Message));
+            }
 
             // Save to DB
             db.ImageSubmissions.Add(imageSubmission);

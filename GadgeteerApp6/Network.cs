@@ -11,6 +11,7 @@ namespace GadgeteerApp
     {
         private EthernetJ11D ethernet;
 
+        // This is used to setup the physical network
         public void Setup(EthernetJ11D eth)
         {
             // Fez 11 MAC: 00-21-03-80-4A-49
@@ -19,15 +20,20 @@ namespace GadgeteerApp
             ethernet.NetworkUp += Ethernet_NetworkUp;
             ethernet.NetworkDown += Ethernet_NetworkDown;
 
-            ethernet.UseStaticIP("192.168.1.200", "255.255.255.0", "192.168.1.1");
+            ethernet.UseStaticIP("192.168.10.2", "255.255.255.0", "192.168.10.1");
             ethernet.UseThisNetworkInterface();
             //ethernet.NetworkInterface.Open();
             //ethernet.NetworkSettings.RenewDhcpLease();
         }
 
+        internal bool GetNetworkStatus()
+        {
+            // Support EMU (no ethernet device: null)
+            return ethernet != null ? ethernet.IsNetworkUp : true;
+        }
+
         private void Ethernet_NetworkUp(Module.NetworkModule sender, Module.NetworkModule.NetworkState state)
         {
-            //throw new NotImplementedException();
             Debug.Print("# Network up");
             ListNetworkInterfaces();
         }

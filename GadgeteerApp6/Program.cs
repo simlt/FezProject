@@ -1,23 +1,14 @@
-﻿using System;
-using System.Collections;
-using System.Threading;
+﻿using Gadgeteer.Modules.GHIElectronics;
+//using GHI.Glide.UI;
 using Microsoft.SPOT;
-using Microsoft.SPOT.Presentation;
-using Microsoft.SPOT.Presentation.Controls;
-using Microsoft.SPOT.Presentation.Media;
-using Microsoft.SPOT.Presentation.Shapes;
-using Microsoft.SPOT.Touch;
-
-using Gadgeteer.Networking;
 using GT = Gadgeteer;
-using GTM = Gadgeteer.Modules;
-using Gadgeteer.Modules.GHIElectronics;
 
 namespace GadgeteerApp
 {
     public partial class Program
     {
         WebServiceClient client = null;
+        // Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.Window));
 
         // This method is run when the mainboard is powered up or reset.   
         void ProgramStarted()
@@ -42,7 +33,10 @@ namespace GadgeteerApp
             network.Setup(ethernet);
 
             // Create new WebServiceClient
-            client = new WebServiceClient("192.168.1.102:50722");
+            client = new WebServiceClient("192.168.10.1:8080", network);
+
+            // Create (and start) a Game
+            var game = new Game(client);
 
             // Use Debug.Print to show messages in Visual Studio's "Output" window during debugging.
             Debug.Print("Program Started");
@@ -51,12 +45,24 @@ namespace GadgeteerApp
         void camera_PictureCaptured(Camera sender, GT.Picture immagine)
         {
             displayT35.SimpleGraphics.DisplayImage(immagine, 0, 0);
-            client.submitImage(1, immagine.MakeBitmap());
-        }   
+            // Test submit for "watch" item
+            client.submitImage(4, immagine);
+        }
 
         void button_ButtonPressed(Button sender, Button.ButtonState state)
         {
-            camera.TakePicture();
+            if (state == Button.ButtonState.Pressed)
+            {
+                if (camera.CameraReady)
+                {
+                    camera.TakePicture();
+                    Debug.Print("Picture taken.");
+                }
+                else
+                {
+                    Debug.Print("Camera not ready.");
+                }
+            }
         }
     }
 }

@@ -32,7 +32,8 @@ namespace WebService.Migrations
                 x => x.Name,
                 new Item() { Name = "Shoe", Points = 50, Labels = new List<string>() { "shoe" } },
                 new Item() { Name = "PC", Points = 150, Labels = new List<string>() { "pc" } },
-                new Item() { Name = "Key", Points = 100, Labels = new List<string>() { "key" } }
+                new Item() { Name = "Key", Points = 100, Labels = new List<string>() { "key" } },
+                new Item() { Name = "Watch", Points = 150, Labels = new List<string>() { "watch, time" } }
             );
         }
     }
