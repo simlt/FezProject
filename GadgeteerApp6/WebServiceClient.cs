@@ -15,6 +15,7 @@ namespace GadgeteerApp
         private string baseuri;
         private Network.NetworkState NetworkState { get; set; }
 
+        // TODO consider using a Queue instead of an ArrayList
         private ArrayList requestCache;
         private delegate object ResponseHandler(HttpWebResponse resp);
         public delegate void ContentHandler(object obj);
@@ -22,9 +23,10 @@ namespace GadgeteerApp
 
         private struct RequestEntry
         {
-            public HttpWebRequest req;
-            public ResponseHandler handler;
-            public ContentHandler cHandler;
+            internal HttpWebRequest req;
+            internal byte[] body;
+            internal ResponseHandler handler;
+            internal ContentHandler cHandler;
         }
 
         public WebServiceClient(string address, Network network)
@@ -32,12 +34,6 @@ namespace GadgeteerApp
             baseuri = "http://" + address + "/api/";
             network.NetworkStateChange += Network_NetworkStateChange;
             requestCache = new ArrayList();
-
-            // TODO DEBUG CODE, REMOVE ME
-            Network_NetworkStateChange((Network)null, Network.NetworkState.Down);
-            var timer = new Gadgeteer.Timer(60 * 1000);
-            timer.Tick += Timer_Tick;
-            timer.Start();
         }
 
         // TODO DEBUG CODE, REMOVE ME
@@ -55,24 +51,34 @@ namespace GadgeteerApp
             }
         }
 
-        private void pushRequest(HttpWebRequest req, ResponseHandler handler, ContentHandler cHandler)
+        private void pushRequest(HttpWebRequest req, byte[] body, ResponseHandler handler, ContentHandler cHandler)
         {
-            requestCache.Add(new RequestEntry { req = req, handler = handler, cHandler = cHandler });
+            requestCache.Add(new RequestEntry { req = req, body = body, handler = handler, cHandler = cHandler });
             sendRequests();
         }
 
         private void sendRequests()
         {
+            int requestIndex;
             try
             {
                 if (NetworkState == Network.NetworkState.Up)
                 {
                     Debug.Print("Network UP: handling queued requests");
                     // Iterate in reverse order so we can delete elements safely while iterating
-                    for (int i = requestCache.Count - 1; i >= 0; --i)
+                    for (requestIndex = requestCache.Count - 1; requestIndex >= 0; --requestIndex)
                     {
-                        RequestEntry entry = (RequestEntry)requestCache[i];
+                        RequestEntry entry = (RequestEntry)requestCache[requestIndex];
                         object content;
+                        // Fill body if present (implicitly starts a connection)
+                        if (entry.body != null)
+                        {
+                            // GetRequestStream: Submits a request with HTTP headers to the server, and returns a Stream object to use to write request data.
+                            using (Stream stream = entry.req.GetRequestStream())
+                            {
+                                stream.Write(entry.body, 0, entry.body.Length);
+                            }
+                        }
                         using (var resp = entry.req.GetResponse() as HttpWebResponse)
                         {
                             content = entry.handler(resp);
@@ -81,14 +87,15 @@ namespace GadgeteerApp
                         if (entry.cHandler != null && content != null)
                             entry.cHandler(content);
 
-                        requestCache.RemoveAt(i);
-                        Debug.Print("RequestEntry id: " + i + " was handled correctly");
+                        requestCache.RemoveAt(requestIndex);
+                        Debug.Print("RequestEntry id: " + requestIndex + " was handled correctly");
                     }
                 }
             }
             catch (WebException e)
             {
-                Debug.Print("Request failed while network was up\n" + e.Message);
+                // TODO should probably remove the request 
+                Debug.Print("Request failed while network was up.\nProbably due to timeout or server not being reachable\n" + e.Message);
             }
         }
 
@@ -103,12 +110,18 @@ namespace GadgeteerApp
                 itemreq.Accept = "application/xml";
 
                 Debug.Print("Sending items GET request...");
-                pushRequest(itemreq, getItemsResponseHandler, itemsHandler);
+                pushRequest(itemreq, null, getItemsResponseHandler, itemsHandler);
             }
             catch (WebException)
             {
                 Debug.Print("Items Request timed out");
             }
+
+            // TODO DEBUG CODE, REMOVE ME
+            Network_NetworkStateChange((Network)null, Network.NetworkState.Down);
+            var timer = new Gadgeteer.Timer(20 * 1000);
+            timer.Tick += Timer_Tick;
+            timer.Start();
         }
 
         private ArrayList getItemsResponseHandler(HttpWebResponse response)
@@ -161,11 +174,11 @@ namespace GadgeteerApp
                 throw new ArgumentException("Unsupported image encoding used for submit");
 
             HttpWebRequest req = null;
+            byte[] imagedata = image.PictureData;
 
             try
             {
                 Uri uri = new Uri(baseuri + "Items/" + itemId + "/Submit/");
-                byte[] imagedata = image.PictureData;
                 /*var imagereq = WebRequest.CreateHttp(uri.Uri);
                 POSTContent content = POSTContent.CreateBinaryBasedContent(image.PictureData);
                 var imagereq = HttpHelper.CreateHttpPostRequest(uri.AbsoluteUri, content, "image/bmp");
@@ -179,12 +192,6 @@ namespace GadgeteerApp
                 req.ContentType = "image/bmp";
                 req.ContentLength = imagedata.Length;
                 //req.SendChunked = true;
-
-                // TODO THIS starts a connection. Find a way to write into body without starting the connection for caching
-                using (Stream stream = req.GetRequestStream())
-                {
-                    stream.Write(imagedata, 0, imagedata.Length);
-                }
             }
             // TODO rivedere gestione eccezioni!
             catch (WebException e)
@@ -193,7 +200,7 @@ namespace GadgeteerApp
                 return;
             }
             Debug.Print("Image POST request prepared...");
-            pushRequest(req, submitImageResponseHandler, pictureHandler);
+            pushRequest(req, imagedata, submitImageResponseHandler, pictureHandler);
         }
 
         private ImageSubmission submitImageResponseHandler(HttpWebResponse response)

@@ -7,10 +7,10 @@ namespace GadgeteerApp
     class Game : Application
     {
         // ArrayList<Item>
-        private ArrayList items;
-        private ArrayList itemsOK;
+        private Hashtable items;
         private WebServiceClient client;
         private int points;
+        private IEnumerator itemEnum;
 
         public Item CurrentItem
         {
@@ -19,26 +19,79 @@ namespace GadgeteerApp
 
         public Game(WebServiceClient client)
         {
-            items = new ArrayList();
-            itemsOK = new ArrayList();
+            items = new Hashtable();
             this.client = client;
 
             // Fill item list
             client.getItems(itemsHandler);
             // itemResponse(items);
+            // test submitImage
             submitImage(new Gadgeteer.Picture(DebugEMU.testImage, Gadgeteer.Picture.PictureEncoding.BMP));
         }
 
         private void itemsHandler(object obj)
         {
-            ArrayList items = obj as ArrayList;
-            this.items = items;
-            if (items.Count > 0)
-                CurrentItem = items[0] as Item;
+            ArrayList itemList = obj as ArrayList;
+            if (itemList.Count > 0)
+            {
+                foreach (Item item in itemList)
+                {
+                    items.Add(item.ItemID, item);
+                }
+                // Enumerator becomes invalid after the table is modified!
+                itemEnum = items.GetEnumerator();
+                // Set first item
+                nextItem();
+            }
             else
             {
                 Debug.Print("Loaded an empty item list for game.");
                 return;
+            }
+        }
+
+        private void nextItem()
+        {
+            bool rescanFromBeginning = true;
+            while (true)
+            {
+                while (itemEnum.MoveNext())
+                {
+                    var entry = itemEnum.Current as DictionaryEntry;
+                    Item item = entry.Value as Item;
+                    if (!item.Found)
+                    {
+                        CurrentItem = item;
+                        return;
+                    }
+                }
+                // Reset to beginning and scan again
+                if (rescanFromBeginning)
+                {
+                    rescanFromBeginning = false;
+                    itemEnum.Reset();
+                }
+                break;
+            }
+            // If we end without getting a next item, we have completed the list!
+            Debug.Print("Game ended!");
+            // TODO handle game ending
+        }
+
+        private void verifyImage(ImageSubmission image)
+        {
+            Item item = items[image.ItemID] as Item;
+            if (image.VerificationResult)
+            {
+                // if image was OK
+                points += item.Points;
+                item.Found = true;
+                nextItem();
+                Debug.Print("Image for item: " + item.Name + " matched successfully");
+            }
+            else
+            {
+                Debug.Print("Image for item: " + item.Name + " did not match");
             }
         }
 
@@ -54,17 +107,7 @@ namespace GadgeteerApp
             client.submitImage(item.ItemID, picture, (object obj) =>
             {
                 ImageSubmission image = obj as ImageSubmission;
-                // if image was OK
-                if (image.VerificationResult)
-                {
-                    points += item.Points;
-                    items.Remove(item);
-                    itemsOK.Add(item);
-                }
-                else
-                {
-                    Debug.Print("Image for item: " + item.Name + " did not match");
-                }
+                verifyImage(image);
             });
         }
     }
