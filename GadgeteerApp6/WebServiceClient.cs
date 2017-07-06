@@ -13,92 +13,149 @@ namespace GadgeteerApp
     class WebServiceClient
     {
         private string baseuri;
-        private Network network;
+        private Network.NetworkState NetworkState { get; set; }
 
-        /*private ArrayList cachedRequest;
-        public delegate void ResponseHandler(Object arg1);
-        public delegate void ItemResponseHandler(ArrayList items);*/
+        private ArrayList requestCache;
+        private delegate object ResponseHandler(HttpWebResponse resp);
+        public delegate void ContentHandler(object obj);
+        public delegate void ItemsHandler(ArrayList item);
+
+        private struct RequestEntry
+        {
+            public HttpWebRequest req;
+            public ResponseHandler handler;
+            public ContentHandler cHandler;
+        }
 
         public WebServiceClient(string address, Network network)
         {
             baseuri = "http://" + address + "/api/";
-            this.network = network;
-            //cachedRequest = new ArrayList();
+            network.NetworkStateChange += Network_NetworkStateChange;
+            requestCache = new ArrayList();
+
+            // TODO DEBUG CODE, REMOVE ME
+            Network_NetworkStateChange((Network)null, Network.NetworkState.Down);
+            var timer = new Gadgeteer.Timer(60 * 1000);
+            timer.Tick += Timer_Tick;
+            timer.Start();
         }
 
-        private bool isNetworkUp()
+        // TODO DEBUG CODE, REMOVE ME
+        private void Timer_Tick(GT.Timer timer)
         {
-            return network.GetNetworkStatus();
+            Network_NetworkStateChange((Network)null, Network.NetworkState.Up);
+        }
+
+        private void Network_NetworkStateChange(Network sender, Network.NetworkState status)
+        {
+            NetworkState = status;
+            if (NetworkState == Network.NetworkState.Up)
+            {
+                sendRequests();
+            }
+        }
+
+        private void pushRequest(HttpWebRequest req, ResponseHandler handler, ContentHandler cHandler)
+        {
+            requestCache.Add(new RequestEntry { req = req, handler = handler, cHandler = cHandler });
+            sendRequests();
+        }
+
+        private void sendRequests()
+        {
+            try
+            {
+                if (NetworkState == Network.NetworkState.Up)
+                {
+                    Debug.Print("Network UP: handling queued requests");
+                    // Iterate in reverse order so we can delete elements safely while iterating
+                    for (int i = requestCache.Count - 1; i >= 0; --i)
+                    {
+                        RequestEntry entry = (RequestEntry)requestCache[i];
+                        object content;
+                        using (var resp = entry.req.GetResponse() as HttpWebResponse)
+                        {
+                            content = entry.handler(resp);
+                        }
+                        // Handle the content if it is possible
+                        if (entry.cHandler != null && content != null)
+                            entry.cHandler(content);
+
+                        requestCache.RemoveAt(i);
+                        Debug.Print("RequestEntry id: " + i + " was handled correctly");
+                    }
+                }
+            }
+            catch (WebException e)
+            {
+                Debug.Print("Request failed while network was up\n" + e.Message);
+            }
         }
 
         // Get the list of items from the Web Service
-        public ArrayList getItems()
+        public void getItems(ContentHandler itemsHandler)
         {
-            ArrayList list = null;
             try
             {
-                list = sendItemRequestSync();
+                Uri uri = new Uri(baseuri + "Items/");
+                var itemreq = WebRequest.Create(uri) as HttpWebRequest;
+                itemreq.Method = "GET";
+                itemreq.Accept = "application/xml";
+
+                Debug.Print("Sending items GET request...");
+                pushRequest(itemreq, getItemsResponseHandler, itemsHandler);
             }
             catch (WebException)
             {
                 Debug.Print("Items Request timed out");
             }
-            return list;
         }
 
-        private ArrayList sendItemRequestSync()
+        private ArrayList getItemsResponseHandler(HttpWebResponse response)
         {
-            Uri uri = new Uri(baseuri + "Items/");
             ArrayList items = new ArrayList();
-
-            var itemreq = WebRequest.Create(uri) as HttpWebRequest;
-            itemreq.Method = "GET";
-            itemreq.Accept = "application/xml";
-
-            Debug.Print("Sending items GET request...");
-            using (var response = itemreq.GetResponse() as HttpWebResponse)
+            if (response.StatusCode == HttpStatusCode.OK)
             {
-                if (response.StatusCode == HttpStatusCode.OK)
+                Debug.Print("Items Request succeeded");
+                try
                 {
-                    Debug.Print("Items Request succeeded");
-                    try
+                    using (XmlReader xml = XmlReader.Create(response.GetResponseStream()))
                     {
-                        using (XmlReader xml = XmlReader.Create(response.GetResponseStream()))
+                        while (xml.ReadToFollowing("Item"))
                         {
-                            while (xml.ReadToFollowing("Item"))
-                            {
-                                xml.Read(); // consume item CHECK if this works
-                                xml.ReadStartElement("ItemID");
-                                int itemID = int.Parse(xml.ReadString());
-                                xml.ReadEndElement();
-                                xml.ReadStartElement("Name");
-                                string name = xml.ReadString();
-                                xml.ReadEndElement();
-                                xml.ReadStartElement("Points");
-                                int points = int.Parse(xml.ReadString());
-                                xml.ReadEndElement();
-                                xml.ReadEndElement(); // Item
-                                var item = new Item() { ItemID = itemID, Name = name, Points = points };
-                                items.Add(item);
-                            }
+                            xml.Read(); // Item
+                            xml.ReadStartElement("ItemID");
+                            int itemID = int.Parse(xml.ReadString());
+                            xml.ReadEndElement();
+                            xml.ReadStartElement("Name");
+                            string name = xml.ReadString();
+                            xml.ReadEndElement();
+                            xml.ReadStartElement("Points");
+                            int points = int.Parse(xml.ReadString());
+                            xml.ReadEndElement();
+                            xml.ReadEndElement(); // Item
+                            var item = new Item() { ItemID = itemID, Name = name, Points = points };
+                            items.Add(item);
                         }
                     }
-                    catch (Exception e)
-                    {
-                        Debug.Print("XML parsing failed with exception:\n" + e.Message);
-                    }
                 }
-                else
+                catch (XmlException e)
                 {
-                    //Show a helpful error message
-                    Debug.Print("Items Request failed with status code " + response.StatusCode + ": " + response.StatusDescription);
+                    Debug.Print("XML parsing failed with exception:\n" + e.Message);
                 }
             }
+            else
+            {
+                //Show a helpful error message
+                Debug.Print("Items Request failed with status code " + response.StatusCode + ": " + response.StatusDescription);
+            }
+
+            // Handle content with delegate passed from user
             return items;
         }
 
         // Send an image to be labeled by the WebService
-        public void submitImage(int itemId, GT.Picture image)
+        public void submitImage(int itemId, GT.Picture image, ContentHandler pictureHandler)
         {
             if (image.Encoding != Gadgeteer.Picture.PictureEncoding.BMP)
                 throw new ArgumentException("Unsupported image encoding used for submit");
@@ -122,136 +179,51 @@ namespace GadgeteerApp
                 req.ContentType = "image/bmp";
                 req.ContentLength = imagedata.Length;
                 //req.SendChunked = true;
+
+                // TODO THIS starts a connection. Find a way to write into body without starting the connection for caching
                 using (Stream stream = req.GetRequestStream())
                 {
                     stream.Write(imagedata, 0, imagedata.Length);
                 }
             }
             // TODO rivedere gestione eccezioni!
-            catch (Exception e)
+            catch (WebException e)
             {
                 Debug.Print("Image POST request failed with exception:\n" + e.Message);
                 return;
             }
-            Debug.Print("Image POST request sent...");
-
-
-            // Send request and wait for response (blocking)
-            using (var response = req.GetResponse() as HttpWebResponse)
-            {
-                try
-                {
-                    if (response.StatusCode == HttpStatusCode.Created)
-                    {
-                        Debug.Print("Image POST succeeded");
-                        using (Stream stream = response.GetResponseStream())
-                        {
-                            var imagesub = new ImageSubmission(stream);
-
-                            // TODO use image result (i.e. Go to next image and parse points)
-                        }
-                    }
-                    else
-                    {
-                        //Show a helpful error message
-                        Debug.Print("Image POST failed with status code " + response.StatusCode);
-                        Debug.Print("Response text: " + response.StatusDescription);
-                    }
-                }
-                // TODO rivedere gestione eccezioni!
-                catch (Exception e)
-                {
-                    Debug.Print("Image response parsing failed with exception:\n" + e.Message);
-                }
-            }
+            Debug.Print("Image POST request prepared...");
+            pushRequest(req, submitImageResponseHandler, pictureHandler);
         }
 
-        /*private void sendItemRequest()
+        private ImageSubmission submitImageResponseHandler(HttpWebResponse response)
         {
-            Uri uri = new Uri(baseuri + "Items/");
-
-            var itemreq = Gadgeteer.Networking.WebClient.GetFromWeb(uri.ToString());
-            itemreq.Accepts = "application/xml";
-            itemreq.ResponseReceived += Itemreq_ResponseReceived;
-            itemreq.SendRequest();
-            Debug.Print("Items GET request sent...");
-        }*/
-
-        /*private void Itemreq_ResponseReceived(HttpRequest sender, HttpResponse response)
-        {
-            if (response.StatusCode == "200")
+            ImageSubmission imagesub = null;
+            try
             {
-                Debug.Print("Items Request succeeded");
-                try
+                if (response.StatusCode == HttpStatusCode.Created)
                 {
-                    using (XmlReader xml = XmlReader.Create(response.Stream))
+                    Debug.Print("Image POST succeeded");
+                    using (Stream stream = response.GetResponseStream())
                     {
-                        while (xml.ReadToFollowing("Item"))
-                        {
-                            xml.Read(); // consume item CHECK if this works
-                            xml.ReadStartElement("ItemID");
-                            int itemID = int.Parse(xml.ReadString());
-                            xml.ReadEndElement();
-                            xml.ReadStartElement("Name");
-                            string name = xml.ReadString();
-                            xml.ReadEndElement();
-                            xml.ReadStartElement("Points");
-                            int points = int.Parse(xml.ReadString());
-                            xml.ReadEndElement();
-                            xml.ReadEndElement(); // Item
-                            var item = new Item() { ItemID = itemID, Name = name, Points = points };
-                            //items.Add(item);
-                        }
+                        imagesub = new ImageSubmission(stream);
+
+                        // TODO use image result (i.e. Go to next image and parse points)
                     }
                 }
-                catch (Exception e)
+                else
                 {
-                    Debug.Print("XML parsing failed with exception:\n" + e.Message);
+                    //Show a helpful error message
+                    Debug.Print("Image POST failed with status code " + response.StatusCode);
+                    Debug.Print("Response text: " + response.StatusDescription);
                 }
             }
-            else
+            // TODO rivedere gestione eccezioni!
+            catch (Exception e)
             {
-                //Show a helpful error message
-                Debug.Print("Items Request failed with status code " + response.StatusCode);
-                Debug.Print("Response text: " + response.Text);
+                Debug.Print("Image response parsing failed with exception:\n" + e.Message);
             }
-        }*/
-
-        /*private void Imagereq_ResponseReceived(HttpRequest sender, HttpResponse response)
-        {
-            if (response.StatusCode == "201")
-            {
-                Debug.Print("Image POST succeeded");
-                try
-                {
-                    using (XmlReader xml = XmlReader.Create(response.Stream))
-                    {
-                        while (xml.ReadToFollowing("ImageSubmission"))
-                        {
-                            xml.ReadStartElement("ImageID");
-                            int imageID = int.Parse(xml.ReadString());
-                            xml.ReadStartElement("ItemID");
-                            int itemID = int.Parse(xml.ReadString());
-                            xml.ReadStartElement("Labels");
-                            // Labels....
-                            xml.ReadStartElement("VerificationResult");
-                            bool result = xml.ReadString() == "true";
-
-                            // TODO use image result (i.e. Go to next image and parse points)
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.Print("XML parsing failed with exception:\n" + e.Message);
-                }
-            }
-            else
-            {
-                //Show a helpful error message
-                Debug.Print("Image POST failed with status code " + response.StatusCode);
-                Debug.Print("Response text: " + response.Text);
-            }
-        }*/
+            return imagesub;
+        }
     }
 }

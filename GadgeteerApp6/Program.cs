@@ -8,6 +8,7 @@ namespace GadgeteerApp
     public partial class Program
     {
         WebServiceClient client = null;
+        Game game = null;
         // Window window = GlideLoader.LoadWindow(Resources.GetString(Resources.StringResources.Window));
 
         // This method is run when the mainboard is powered up or reset.   
@@ -36,7 +37,7 @@ namespace GadgeteerApp
             client = new WebServiceClient("192.168.10.1:8080", network);
 
             // Create (and start) a Game
-            var game = new Game(client);
+            game = new Game(client);
 
             // Use Debug.Print to show messages in Visual Studio's "Output" window during debugging.
             Debug.Print("Program Started");
@@ -46,7 +47,7 @@ namespace GadgeteerApp
         {
             displayT35.SimpleGraphics.DisplayImage(immagine, 0, 0);
             // Test submit for "watch" item
-            client.submitImage(4, immagine);
+            game.submitImage(immagine);
         }
 
         void button_ButtonPressed(Button sender, Button.ButtonState state)

@@ -10,6 +10,9 @@ namespace GadgeteerApp
     class Network
     {
         private EthernetJ11D ethernet;
+        public enum NetworkState { Up, Down };
+        public delegate void NetworkEventHandler(Network sender, NetworkState status);
+        public event NetworkEventHandler NetworkStateChange;
 
         // This is used to setup the physical network
         public void Setup(EthernetJ11D eth)
@@ -26,22 +29,17 @@ namespace GadgeteerApp
             //ethernet.NetworkSettings.RenewDhcpLease();
         }
 
-        internal bool GetNetworkStatus()
-        {
-            // Support EMU (no ethernet device: null)
-            return ethernet != null ? ethernet.IsNetworkUp : true;
-        }
-
         private void Ethernet_NetworkUp(Module.NetworkModule sender, Module.NetworkModule.NetworkState state)
         {
             Debug.Print("# Network up");
             ListNetworkInterfaces();
+            NetworkStateChange(this, NetworkState.Up);
         }
 
-        static private void Ethernet_NetworkDown(Module.NetworkModule sender, Module.NetworkModule.NetworkState state)
+        private void Ethernet_NetworkDown(Module.NetworkModule sender, Module.NetworkModule.NetworkState state)
         {
-            //throw new NotImplementedException();
             Debug.Print("# Network down");
+            NetworkStateChange(this, NetworkState.Down);
         }
 
         private void ListNetworkInterfaces()

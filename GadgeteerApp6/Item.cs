@@ -6,6 +6,6 @@
         public string Name { get; set; }
         public int Points { get; set; }
 
-        public Item() { }
+        internal Item() { }
     }
 }
