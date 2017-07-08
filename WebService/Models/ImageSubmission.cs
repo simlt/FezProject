@@ -16,6 +16,8 @@ namespace WebService.Models
         /*[Required]
         public string Description { get; set; }*/
         [Required]
+        public int GameID { get; set; }
+        [Required]
         public byte[] Image { get; set; }
         public bool VerificationResult { get; set; }
         public string LabelsAsString
@@ -34,11 +36,14 @@ namespace WebService.Models
             get { return _labels; }
             set { _labels = value; }
         }
+
     }
 
     [DataContract(Name = "ImageSubmission")]
     public class ImageSubmissionDTO
     {
+        /*[DataMember]
+        public int GameID { get; set; }*/
         [DataMember]
         public int ImageID { get; set; }
         [DataMember]
@@ -50,6 +55,7 @@ namespace WebService.Models
 
         internal ImageSubmissionDTO(ImageSubmission imageSubmission)
         {
+            //GameID = imageSubmission.GameID;
             ImageID = imageSubmission.ImageID;
             ItemID = imageSubmission.ItemID;
             VerificationResult = imageSubmission.VerificationResult;

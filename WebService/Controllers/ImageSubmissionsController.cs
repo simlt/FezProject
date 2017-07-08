@@ -104,18 +104,25 @@ namespace WebService.Controllers
             return CreatedAtRoute("FezAPI", new { id = imageSubmission.ImageID }, imageSubmission);
         }*/
 
-        [Route("~/api/Items/{ItemId}/Submit")]
+        [Route("~/api/Games/{GameId:int}/Items/{ItemId:int}")]
         [ResponseType(typeof(ImageSubmissionDTO))]
-        public async Task<IHttpActionResult> Submit(int ItemId)
+        public async Task<IHttpActionResult> Submit(int GameId, int ItemId)
         {
+            Game game = null;
             Item item = null;
             try
             {
+                game = db.Games.Single(i => i.GameID == GameId);
                 item = db.Items.Single(i => i.ItemID == ItemId);
             }
             catch
             {
-                return BadRequest("Can't upload image for a non-existing item.");
+                string message;
+                if (game == null)
+                    message = "Invalid game session";
+                else
+                    message = "Invalid item ID";
+                return BadRequest(message);
             }
             if (Request.Content.Headers.ContentType.MediaType != "image/bmp")
             {
@@ -123,12 +130,13 @@ namespace WebService.Controllers
             }
 
             var imageSubmission = new ImageSubmission();
+            imageSubmission.GameID = GameId;
             imageSubmission.ItemID = ItemId;
             imageSubmission.Item = item;
             imageSubmission.Image = await Request.Content.ReadAsByteArrayAsync();
-            //var image = Image.FromStream(data.GetStream(Request.Content, Request.Content.Headers));
-            var image = Image.FromBytes(imageSubmission.Image);
 
+#if false
+            var image = Image.FromBytes(imageSubmission.Image);
             // ### QUERY Google Cloud Service
             try
             {
@@ -151,6 +159,10 @@ namespace WebService.Controllers
             {
                 return InternalServerError(new Exception("Could not successfully parse the image on Google Cloud.\n" + e.Message));
             }
+#else
+            imageSubmission.Labels.Add("DEBUG label");
+            imageSubmission.VerificationResult = true;
+#endif
 
             // Save to DB
             db.ImageSubmissions.Add(imageSubmission);

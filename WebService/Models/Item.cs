@@ -10,6 +10,7 @@ namespace WebService.Models
     // The requested item to be searched
     public class Item
     {
+        [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ItemID { get; set; }
         [Required]
@@ -18,6 +19,7 @@ namespace WebService.Models
             get { return String.Join(",", _labels); }
             set { _labels = value.Split(',').ToList(); }
         }
+        [Required]
         public int Points { get; set; }
 
         private List<string> _labels = new List<string>();

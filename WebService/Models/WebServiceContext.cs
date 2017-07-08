@@ -22,5 +22,12 @@ namespace WebService.Models
         public System.Data.Entity.DbSet<WebService.Models.Item> Items { get; set; }
 
         public System.Data.Entity.DbSet<WebService.Models.ImageSubmission> ImageSubmissions { get; set; }
+
+        public System.Data.Entity.DbSet<WebService.Models.Game> Games { get; set; }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Game>().HasMany<Item>(g => g.Items).WithMany();
+        }
     }
 }
