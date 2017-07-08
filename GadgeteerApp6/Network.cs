@@ -10,7 +10,7 @@ namespace GadgeteerApp
     class Network
     {
         private EthernetJ11D ethernet;
-        public enum NetworkState { Up, Down };
+        public enum NetworkState { Down, Up };
         public delegate void NetworkEventHandler(Network sender, NetworkState status);
         public event NetworkEventHandler NetworkStateChange;
 

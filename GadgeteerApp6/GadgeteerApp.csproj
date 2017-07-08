@@ -45,6 +45,7 @@
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
     <Compile Include="Game.cs" />
+    <Compile Include="GameSession.cs" />
     <Compile Include="ImageSubmission.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="Network.cs" />

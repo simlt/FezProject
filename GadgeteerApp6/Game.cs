@@ -6,37 +6,56 @@ namespace GadgeteerApp
 {
     class Game : Application
     {
-        // ArrayList<Item>
         private Hashtable items;
         private WebServiceClient client;
-        private int points;
-        private IEnumerator itemEnum;
 
-        public Item CurrentItem
-        {
-            get; private set;
-        }
+        public int CurrentPoints { get; private set; }
+        public int TotalPoints { get; private set; }
+        public int GameID { get; private set; }
+        private delegate void GameLoadedHandler(GameSession session);
+        private event GameLoadedHandler GameLoaded;
+
+        private IEnumerator itemEnum;
+        public Item CurrentItem { get; private set; }
 
         public Game(WebServiceClient client)
         {
-            items = new Hashtable();
             this.client = client;
+            items = new Hashtable();
+            GameLoaded += OnGameLoad;
 
+            // Request new Game
+            client.createGame(g => {
+                GameLoaded(g as GameSession);
+            });
+            
             // Fill item list
-            client.getItems(itemsHandler);
-            // itemResponse(items);
+            //client.getItems(itemsHandler);
+        }
+
+        private void OnGameLoad(GameSession session)
+        {
+            GameID = session.GameID;
+            loadItems(session.items);
+            Debug.Print("Game session successfully started with id: " + GameID);
             // test submitImage
             submitImage(new Gadgeteer.Picture(DebugEMU.testImage, Gadgeteer.Picture.PictureEncoding.BMP));
         }
 
-        private void itemsHandler(object obj)
+        private void loadItems(object obj)
         {
+            /*
+             * TODO itemList is already in random order, so we use its enumerator to enum each item.
+             * We only memorize the Hashtable items here so we *may* lose the random generated order.
+             */
             ArrayList itemList = obj as ArrayList;
+            CurrentPoints = 0;
             if (itemList.Count > 0)
             {
                 foreach (Item item in itemList)
                 {
                     items.Add(item.ItemID, item);
+                    TotalPoints += item.Points;
                 }
                 // Enumerator becomes invalid after the table is modified!
                 itemEnum = items.GetEnumerator();
@@ -84,7 +103,7 @@ namespace GadgeteerApp
             if (image.VerificationResult)
             {
                 // if image was OK
-                points += item.Points;
+                CurrentPoints += item.Points;
                 item.Found = true;
                 nextItem();
                 Debug.Print("Image for item: " + item.Name + " matched successfully");
@@ -104,7 +123,7 @@ namespace GadgeteerApp
                 return;
             }
 
-            client.submitImage(item.ItemID, picture, (object obj) =>
+            client.submitImage(GameID, item.ItemID, picture, (object obj) =>
             {
                 ImageSubmission image = obj as ImageSubmission;
                 verifyImage(image);
