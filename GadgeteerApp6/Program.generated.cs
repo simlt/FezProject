@@ -24,10 +24,14 @@ namespace GadgeteerApp {
         /// <summary>The USB Client DP module using socket 1 of the mainboard.</summary>
         private Gadgeteer.Modules.GHIElectronics.USBClientDP usbClientDP;
         
-        /// <summary>The Ethernet J11D module using socket 7 of the mainboard.</summary>
+        /// <summary>The Button module using socket 4 of the mainboard.</summary>
         private Gadgeteer.Modules.GHIElectronics.Button button;
         
         /// <summary>The Button module using socket 11 of the mainboard.</summary>
+        private Gadgeteer.Modules.GHIElectronics.Button button2;
+        
+        /// <summary>The Ethernet J11D module using socket 7 of the mainboard.</summary>
+        private Gadgeteer.Modules.GHIElectronics.EthernetJ11D ethernet;
         
         /// <summary>This property provides access to the Mainboard API. This is normally not necessary for an end user program.</summary>
         protected new static GHIElectronics.Gadgeteer.FEZSpider Mainboard {
@@ -54,9 +58,9 @@ namespace GadgeteerApp {
             this.camera = new GTM.GHIElectronics.Camera(3);
             this.displayT35 = new GTM.GHIElectronics.DisplayT35(14, 13, 12, 10);
             this.usbClientDP = new GTM.GHIElectronics.USBClientDP(1);
+            this.ethernet = new GTM.GHIElectronics.EthernetJ11D(7);
             this.button = new GTM.GHIElectronics.Button(4);
             this.button2 = new GTM.GHIElectronics.Button(11);
-            this.button = new GTM.GHIElectronics.Button(4);
         }
     }
 }

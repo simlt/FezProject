@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace GadgeteerApp
 {
-    class Game : Application
+    class Game
     {
         private Hashtable items;
         private WebServiceClient client;
@@ -39,7 +39,7 @@ namespace GadgeteerApp
             loadItems(session.items);
             Debug.Print("Game session successfully started with id: " + GameID);
             // test submitImage
-            submitImage(new Gadgeteer.Picture(DebugEMU.testImage, Gadgeteer.Picture.PictureEncoding.BMP));
+            // submitImage(new Gadgeteer.Picture(DebugEMU.testImage, Gadgeteer.Picture.PictureEncoding.BMP));
         }
 
         private void loadItems(object obj)
