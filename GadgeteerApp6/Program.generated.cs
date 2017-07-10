@@ -15,9 +15,6 @@ namespace GadgeteerApp6 {
     
     public partial class Program : Gadgeteer.Program {
         
-        /// <summary>The Button module using socket 11 of the mainboard.</summary>
-        private Gadgeteer.Modules.GHIElectronics.Button button;
-        
         /// <summary>The Camera module using socket 3 of the mainboard.</summary>
         private Gadgeteer.Modules.GHIElectronics.Camera camera;
         
@@ -28,6 +25,9 @@ namespace GadgeteerApp6 {
         private Gadgeteer.Modules.GHIElectronics.USBClientDP usbClientDP;
         
         /// <summary>The Button module using socket 4 of the mainboard.</summary>
+        private Gadgeteer.Modules.GHIElectronics.Button button;
+        
+        /// <summary>The Button module using socket 11 of the mainboard.</summary>
         private Gadgeteer.Modules.GHIElectronics.Button button2;
         
         /// <summary>This property provides access to the Mainboard API. This is normally not necessary for an end user program.</summary>
@@ -52,11 +52,11 @@ namespace GadgeteerApp6 {
         }
         
         private void InitializeModules() {
-            this.button = new GTM.GHIElectronics.Button(11);
             this.camera = new GTM.GHIElectronics.Camera(3);
             this.displayT35 = new GTM.GHIElectronics.DisplayT35(14, 13, 12, 10);
             this.usbClientDP = new GTM.GHIElectronics.USBClientDP(1);
-            this.button2 = new GTM.GHIElectronics.Button(4);
+            this.button = new GTM.GHIElectronics.Button(4);
+            this.button2 = new GTM.GHIElectronics.Button(11);
         }
     }
 }
