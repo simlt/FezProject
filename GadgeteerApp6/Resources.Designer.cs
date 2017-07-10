@@ -29,6 +29,20 @@ namespace GadgeteerApp
         {
             return ((Microsoft.SPOT.Font)(Microsoft.SPOT.ResourceUtility.GetObject(ResourceManager, id)));
         }
+        internal static string GetString(Resources.StringResources id)
+        {
+            return ((string)(Microsoft.SPOT.ResourceUtility.GetObject(ResourceManager, id)));
+        }
+        [System.SerializableAttribute()]
+        internal enum StringResources : short
+        {
+            conclusion = -21788,
+            fatto = -6391,
+            conferma_immagine = -4115,
+            introduzione_iniziale = 10139,
+            gestione_gioco = 17699,
+            acquisizione_immagine = 22617,
+        }
         [System.SerializableAttribute()]
         internal enum FontResources : short
         {
