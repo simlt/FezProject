@@ -25,9 +25,7 @@ namespace GadgeteerApp
             GameLoaded += OnGameLoad;
 
             // Request new Game
-            client.createGame(g => {
-                GameLoaded(g as GameSession);
-            });
+            client.createGame(g => GameLoaded(g));
             
             // Fill item list
             //client.getItems(itemsHandler);
@@ -42,13 +40,12 @@ namespace GadgeteerApp
             // submitImage(new Gadgeteer.Picture(DebugEMU.testImage, Gadgeteer.Picture.PictureEncoding.BMP));
         }
 
-        private void loadItems(object obj)
+        private void loadItems(ArrayList itemList)
         {
             /*
              * TODO itemList is already in random order, so we use its enumerator to enum each item.
              * We only memorize the Hashtable items here so we *may* lose the random generated order.
              */
-            ArrayList itemList = obj as ArrayList;
             CurrentPoints = 0;
             if (itemList.Count > 0)
             {
@@ -123,11 +120,7 @@ namespace GadgeteerApp
                 return;
             }
 
-            client.submitImage(GameID, item.ItemID, picture, (object obj) =>
-            {
-                ImageSubmission image = obj as ImageSubmission;
-                verifyImage(image);
-            });
+            client.submitImage(GameID, item.ItemID, picture, verifyImage);
         }
     }
 }
