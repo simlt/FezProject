@@ -84,8 +84,6 @@ namespace GadgeteerApp
                     break;
                 case InterfaceState.ACQUIRE:
                     takePicture();
-                    //SelectionChangedEventHandler.Remove(button_ButtonPressed, pulsante_1);
-                    //button.ButtonPressed += new Gadgeteer.Modules.GHIElectronics.Button.ButtonEventHandler(green_button);
                     break;
                 case InterfaceState.CONFIRMED:
                     game.submitImage(picture);
@@ -145,7 +143,11 @@ namespace GadgeteerApp
         public void item(Item currentItem)
         {
             var text = (GHI.Glide.UI.TextBlock)itempage.GetChildByName("instancegestione");
-            text.Text = currentItem.Name;
+            if (currentItem != null)
+                text.Text = currentItem.Name;
+            else
+                text.Text = "ITEM_NOT_FOUND";
+
             Glide.MainWindow = itempage;
         }
         public void acquisition(Bitmap bmp)

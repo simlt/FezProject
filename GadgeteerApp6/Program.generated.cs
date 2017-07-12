@@ -59,6 +59,7 @@ namespace GadgeteerApp {
             this.displayT35 = new GTM.GHIElectronics.DisplayT35(14, 13, 12, 10);
             this.usbClientDP = new GTM.GHIElectronics.USBClientDP(1);
             this.ethernet = new GTM.GHIElectronics.EthernetJ11D(7);
+            // Keep button here at the end, otherwise it BUGS the camera!!!!
             this.button = new GTM.GHIElectronics.Button(4);
             this.button2 = new GTM.GHIElectronics.Button(11);
         }

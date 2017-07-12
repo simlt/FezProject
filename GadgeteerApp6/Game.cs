@@ -36,8 +36,6 @@ namespace GadgeteerApp
             GameID = session.GameID;
             loadItems(session.items);
             Debug.Print("Game session successfully started with id: " + GameID);
-            // test submitImage
-            // submitImage(new Gadgeteer.Picture(DebugEMU.testImage, Gadgeteer.Picture.PictureEncoding.BMP));
         }
 
         private void loadItems(ArrayList itemList)

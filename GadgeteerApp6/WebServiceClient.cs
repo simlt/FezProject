@@ -112,23 +112,12 @@ namespace GadgeteerApp
             }
         }
 
-        // TODO DEBUG CODE, REMOVE ME
-        private void Timer_Tick(GT.Timer timer)
-        {
-            Network_NetworkStateChange(null, Network.NetworkState.Up);
-        }
-
         private void Network_NetworkStateChange(Network sender, Network.NetworkState status)
         {
-            // Lock on m_requestCache. NetworkState is ONLY used in processRequests()
-            lock (m_requestCache)
-            {
-                m_networkState = status;
-                string text = m_networkState == Network.NetworkState.Up ? "up" : "down";
-                Debug.Print("Network state change: " + text);
-                if ((m_networkState == Network.NetworkState.Up) && m_requestCache.Count > 0)
-                    m_requestARE.Set();
-            }
+            m_networkState = status;
+            string text = status == Network.NetworkState.Up ? "up" : "down";
+            Debug.Print("Network state change: " + text);
+            m_requestARE.Set();
         }
 
         // Get the list of items from the Web Service
@@ -253,13 +242,6 @@ namespace GadgeteerApp
                 Debug.Print("Game POST request failed with exception:\n" + e.Message);
                 return;
             }
-
-            // TODO DEBUG CODE, REMOVE ME
-            Network_NetworkStateChange(null, Network.NetworkState.Down);
-            var timer = new GT.Timer(10 * 1000);
-            timer.Tick += Timer_Tick;
-            timer.Behavior = GT.Timer.BehaviorType.RunOnce;
-            timer.Start();
         }
 
         private GameSession createGameResponseHandler(HttpWebResponse response)
