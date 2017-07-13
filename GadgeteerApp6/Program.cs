@@ -11,7 +11,7 @@ namespace GadgeteerApp
     {
         private Game game;
         private GT.Picture picture;
-        private interfaccia finestra = new interfaccia();
+        private interfaccia finestra;
 
         enum InterfaceState
         {
@@ -35,6 +35,9 @@ namespace GadgeteerApp
 
             // Create (and start) a Game
             game = new Game(client);
+
+            // Initialize interface
+            finestra = new interfaccia();
 
             button.ButtonPressed += green_button;
             button2.ButtonPressed += red_button;
