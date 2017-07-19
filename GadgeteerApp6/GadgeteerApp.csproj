@@ -73,6 +73,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Microsoft .NET Gadgeteer\Core\Assemblies\.NET Micro Framework 4.3\Gadgeteer.SPI.dll</HintPath>
     </Reference>
+    <Reference Include="Gadgeteer.WebClient, Version=2.43.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Gadgeteer.WebServer, Version=2.43.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="GHI.Glide, Version=4.3.8.1, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="GHI.Hardware, Version=4.3.8.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -84,6 +90,9 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="GHIElectronics.Gadgeteer.FEZSpider, Version=4.3.8.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="GTM.GHIElectronics.Breakout, Version=4.3.8.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="GTM.GHIElectronics.Button, Version=4.3.8.1, Culture=neutral, processorArchitecture=MSIL">

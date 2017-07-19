@@ -30,10 +30,12 @@ namespace WebService.Migrations
             //
             context.Items.AddOrUpdate(
                 x => x.Name,
-                new Item() { Name = "Shoe", Points = 50, Labels = new List<string>() { "shoe" } },
-                new Item() { Name = "PC", Points = 150, Labels = new List<string>() { "pc" } },
-                new Item() { Name = "Key", Points = 100, Labels = new List<string>() { "key" } },
-                new Item() { Name = "Watch", Points = 150, Labels = new List<string>() { "watch, time" } }
+                //new Item() { Name = "Shoe", Points = 50, Labels = new List<string>() { "shoe", "footwear" } },
+                new Item() { Name = "Mouse", Points = 150, Labels = new List<string>() { "mouse", "input device", "electronics" } },
+                new Item() { Name = "Key", Points = 50, Labels = new List<string>() { "key", "keys", "keychain" } },
+                new Item() { Name = "Watch", Points = 100, Labels = new List<string>() { "watch", "time", "jewelry", "clock" } },
+                new Item() { Name = "Glasses", Points = 150, Labels = new List<string>() { "glasses", "shades", "jewelry" } },
+                new Item() { Name = "Scissors", Points = 100, Labels = new List<string>() { "scissor", "scissors", "tool" } }
             );
         }
     }

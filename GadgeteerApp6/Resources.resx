@@ -117,15 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="conferma_immagine" xml:space="preserve">
-    <value>&lt;Glide Version="1.0.7"&gt;
-  &lt;Window Name="image_to_confirm" Width="320" Height="240" BackColor="FFFFFF"&gt;
-    &lt;Image Name="img_visualize" X="30" Y="0" Width="260" Height="195" Alpha="255"/&gt;
-    &lt;TextBlock Name="instance25660" X="35" Y="200" Width="250" Height="40" Alpha="255" Text="Are you sure to load this image? Green button to agree, red one for a retry " TextAlign="Left" TextVerticalAlign="Center" Font="3" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
-  &lt;/Window&gt;
-&lt;/Glide&gt;</value>
-    <comment>conferma immagine caricata</comment>
-  </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="NinaB" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\NinaB.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
@@ -133,37 +124,49 @@
   <data name="small" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\small.tinyfnt;System.Byte[], mscorlib, Culture=neutral, PublicKeyToken=null</value>
   </data>
-  <data name="acquisizione_immagine" xml:space="preserve">
-    <value>&lt;Glide Version="1.0.7"&gt;
-  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
-    &lt;Image Name="quadrato_img" X="35" Y="43" Width="250" Height="191" Alpha="255"/&gt;
-    &lt;TextBlock Name="instance439" X="0" Y="0" Width="100" Height="32" Alpha="255" Text="PAGINA3" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
-  &lt;/Window&gt;
-&lt;/Glide&gt;</value>
-    <comment>pagina di acquisizione</comment>
-  </data>
-  <data name="gestione_gioco" xml:space="preserve">
-    <value>&lt;Glide Version="1.0.7"&gt;
-  &lt;Window Name="gestione" Width="320" Height="240" BackColor="FFFFFF"&gt;
-    &lt;TextBlock Name="instancegestione" X="10" Y="20" Width="300" Height="200" Alpha="255" Text="pagina2" TextAlign="center" TextVerticalAlign="Top" Font="4" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
-  &lt;/Window&gt;
-&lt;/Glide&gt;</value>
-    <comment>selezione immagini</comment>
-  </data>
   <data name="introduzione_iniziale" xml:space="preserve">
     <value>&lt;Glide Version="1.0.7"&gt;
   &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
-    &lt;TextBlock Name="instance616" X="10" Y="20" Width="300" Height="200" Alpha="255" Text="TextBlock" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;TextBlock Name="instance616" X="10" Y="20" Width="300" Height="200" Alpha="255" Text="If you have some spare time, if you are curious, and you
+like the idea to try an easy challenge... 
+Try our scavenger hunt game. It probably will not take too much time but, really, 
+it depends on you.
+Press the green button to start playing and good luck.
+P.S. i'm a bit old so sometimes, when you push one of my button, let me some
+time to think about it" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
     <comment>prima schermata con spiegazione</comment>
   </data>
-  <data name="conclusion" xml:space="preserve">
+  <data name="acquisizione_immagine" xml:space="preserve">
     <value>&lt;Glide Version="1.0.7"&gt;
-  &lt;Window Name="conclusion" Width="320" Height="240" BackColor="FFFFFF"&gt;
-    &lt;TextBlock Name="instance616" X="10" Y="20" Width="300" Height="200" Alpha="255" Text="pagina6" TextAlign="center" TextVerticalAlign="Top" Font="4" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;TextBlock Name="red" X="0" Y="195" Width="100" Height="45" Alpha="255" Text="Item" TextAlign="Center" TextVerticalAlign="Center" Font="5" FontColor="0" BackColor="FF5555" ShowBackColor="True"/&gt;
+    &lt;TextBlock Name="green" X="220" Y="195" Width="100" Height="45" Alpha="255" Text="Take Picture" TextAlign="Center" TextVerticalAlign="Center" Font="5" FontColor="0" BackColor="55FF55" ShowBackColor="True"/&gt;
+    &lt;Image Name="quadrato_img" X="35" Y="0" Width="250" Height="195" Alpha="255"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
+    <comment>pagina di acquisizione</comment>
+  </data>
+  <data name="conclusion" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;TextBlock Name="green" X="220" Y="195" Width="100" Height="45" Alpha="255" Text="Start new game!" TextAlign="Center" TextVerticalAlign="Center" Font="5" FontColor="0" BackColor="55FF55" ShowBackColor="True"/&gt;
+    &lt;TextBlock Name="message" X="10" Y="10" Width="300" Height="64" Alpha="255" Text="" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="0" BackColor="FFFFFF" ShowBackColor="false"/&gt;
+    &lt;TextBlock Name="text" X="21" Y="95" Width="150" Height="50" Alpha="255" Text="Total final score: " TextAlign="center" TextVerticalAlign="center" Font="5" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;TextBlock Name="score" X="197" Y="95" Width="100" Height="50" Alpha="255" Text="" TextAlign="center" TextVerticalAlign="center" Font="5" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
+  </data>
+  <data name="conferma_immagine" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;TextBlock Name="red" X="0" Y="195" Width="100" Height="45" Alpha="255" Text="Retry" TextAlign="Center" TextVerticalAlign="Center" Font="5" FontColor="0" BackColor="FF5555" ShowBackColor="True"/&gt;
+    &lt;TextBlock Name="green" X="220" Y="195" Width="100" Height="45" Alpha="255" Text="Confirm" TextAlign="Center" TextVerticalAlign="Center" Font="5" FontColor="0" BackColor="55FF55" ShowBackColor="True"/&gt;
+    &lt;Image Name="img_visualize" X="35" Y="0" Width="250" Height="195" Alpha="255"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
+    <comment>conferma immagine caricata</comment>
   </data>
   <data name="fatto" xml:space="preserve">
     <value>&lt;Glide Version="1.0.7"&gt;
@@ -171,5 +174,18 @@
     &lt;TextBlock Name="instancefatto" X="10" Y="20" Width="300" Height="200" Alpha="255" Text="pagina5" TextAlign="center" TextVerticalAlign="Top" Font="4" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
+  </data>
+  <data name="gestione_gioco" xml:space="preserve">
+    <value>&lt;Glide Version="1.0.7"&gt;
+  &lt;Window Name="instance115" Width="320" Height="240" BackColor="FFFFFF"&gt;
+    &lt;TextBlock Name="red" X="0" Y="195" Width="100" Height="45" Alpha="255" Text="Give up!" TextAlign="Center" TextVerticalAlign="Center" Font="5" FontColor="0" BackColor="FF5555" ShowBackColor="True"/&gt;
+    &lt;TextBlock Name="green" X="220" Y="195" Width="100" Height="45" Alpha="255" Text="Go to camera" TextAlign="Center" TextVerticalAlign="Center" Font="5" FontColor="0" BackColor="55FF55" ShowBackColor="True"/&gt;
+    &lt;TextBlock Name="info2" X="10" Y="10" Width="300" Height="64" Alpha="255" Text="Find the requested object and place it in front of the camera. Then proceed to take a picture.
+Object to be found:" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="0" BackColor="FFFFFF" ShowBackColor="false"/&gt;
+    &lt;TextBlock Name="item" X="21" Y="95" Width="150" Height="50" Alpha="255" Text="" TextAlign="center" TextVerticalAlign="center" Font="5" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
+    &lt;TextBlock Name="score" X="197" Y="95" Width="100" Height="50" Alpha="255" Text="" TextAlign="center" TextVerticalAlign="center" Font="5" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
+  &lt;/Window&gt;
+&lt;/Glide&gt;</value>
+    <comment>selezione immagini</comment>
   </data>
 </root>

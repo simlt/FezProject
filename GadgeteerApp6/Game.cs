@@ -12,8 +12,14 @@ namespace GadgeteerApp
         public int CurrentPoints { get; private set; }
         public int TotalPoints { get; private set; }
         public int GameID { get; private set; }
-        private delegate void GameLoadedHandler(GameSession session);
-        private event GameLoadedHandler GameLoaded;
+        public delegate void GameLoadedHandler(GameSession session);
+        public event GameLoadedHandler GameLoaded;
+
+        public delegate void PictureVerifiedHandler(PictureVerifiedEventArgs args);
+        public event PictureVerifiedHandler PictureVerified;
+
+        public delegate void GameEndedHandler();
+        public event GameEndedHandler GameEnded;
 
         private IEnumerator itemEnum;
         public Item CurrentItem { get; private set; }
@@ -24,11 +30,7 @@ namespace GadgeteerApp
             items = new Hashtable();
             GameLoaded += OnGameLoad;
 
-            // Request new Game
-            client.createGame(g => GameLoaded(g));
-            
-            // Fill item list
-            //client.getItems(itemsHandler);
+            start();
         }
 
         private void OnGameLoad(GameSession session)
@@ -45,6 +47,8 @@ namespace GadgeteerApp
              * We only memorize the Hashtable items here so we *may* lose the random generated order.
              */
             CurrentPoints = 0;
+            TotalPoints = 0;
+            items.Clear();
             if (itemList.Count > 0)
             {
                 foreach (Item item in itemList)
@@ -64,7 +68,7 @@ namespace GadgeteerApp
             }
         }
 
-        private void nextItem()
+        public void nextItem()
         {
             bool rescanFromBeginning = true;
             while (true)
@@ -88,8 +92,7 @@ namespace GadgeteerApp
                 break;
             }
             // If we end without getting a next item, we have completed the list!
-            Debug.Print("Game ended!");
-            // TODO handle game ending
+            checkEnd();
         }
 
         private void verifyImage(ImageSubmission image)
@@ -100,17 +103,50 @@ namespace GadgeteerApp
                 // if image was OK
                 CurrentPoints += item.Points;
                 item.Found = true;
-                nextItem();
                 Debug.Print("Image for item: " + item.Name + " matched successfully");
             }
             else
             {
                 Debug.Print("Image for item: " + item.Name + " did not match");
             }
+            PictureVerified(new PictureVerifiedEventArgs(item, image.VerificationResult));
+
+            // Check if all item were found
+            checkEnd();
+        }
+
+        internal void start()
+        {
+            client.flushRequests();
+            // Request new Game
+            client.createGame(g => GameLoaded(g));
+        }
+
+        internal void end()
+        {
+            client.flushRequests();
+        }
+
+        private void checkEnd()
+        {
+            foreach (DictionaryEntry item in items)
+            {
+                if (((Item)item.Value).Found == false)
+                    return;
+            }
+
+            Debug.Print("Game ended!");
+            client.flushRequests();
+            GameEnded();
         }
 
         public void submitImage(Gadgeteer.Picture picture)
         {
+            if (picture == null)
+            {
+                Debug.Print("No picture is set for submitImage");
+                return;
+            }
             Item item = CurrentItem;
             if (item == null)
             {
@@ -119,6 +155,20 @@ namespace GadgeteerApp
             }
 
             client.submitImage(GameID, item.ItemID, picture, verifyImage);
+        }
+    }
+
+    internal class PictureVerifiedEventArgs : EventArgs
+    {
+        public string Name;
+        public int Points;
+        public bool Result;
+
+        public PictureVerifiedEventArgs(Item item, bool verificationResult)
+        {
+            Name = item.Name;
+            Points = item.Points;
+            Result = verificationResult;
         }
     }
 }

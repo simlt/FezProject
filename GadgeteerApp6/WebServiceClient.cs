@@ -99,7 +99,7 @@ namespace GadgeteerApp
                                 m_requestCache.RemoveAt(requestIndex);
                                 Debug.Print("RequestEntry id: " + requestIndex + " processed successfully");
                             }
-                            catch (WebException)
+                            catch (Exception)
                             {
                                 // TODO should probably remove the request (add retry counter?). Temporary using sleep to delay retries by 30s
                                 int sleepSec = 30;
@@ -109,6 +109,14 @@ namespace GadgeteerApp
                         }
                     }
                 }
+            }
+        }
+
+        internal void flushRequests()
+        {
+            lock (m_requestCache)
+            {
+                m_requestCache.Clear();
             }
         }
 
@@ -191,7 +199,6 @@ namespace GadgeteerApp
                 pushRequest(req, imagedata, submitImageResponseHandler, o => imageHandler(o as ImageSubmission));
                 Debug.Print("Image POST request prepared...");
             }
-            // TODO rivedere gestione eccezioni!
             catch (WebException e)
             {
                 Debug.Print("Image POST request failed with exception:\n" + e.Message);

@@ -135,7 +135,7 @@ namespace WebService.Controllers
             imageSubmission.Item = item;
             imageSubmission.Image = await Request.Content.ReadAsByteArrayAsync();
 
-#if false
+#if true
             var image = Image.FromBytes(imageSubmission.Image);
             // ### QUERY Google Cloud Service
             try
