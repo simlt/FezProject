@@ -54,9 +54,8 @@ namespace GadgeteerApp
             greenLED = new OutputPort(FEZSpider.Socket4.Pin4, false);
             greenbuttonHW.OnInterrupt += ButtonHW_OnInterrupt;
             button2.ButtonPressed += red_button;
-            camera.BitmapStreamed += camera_StreamCamera;
             game.PictureVerified += finestra.PictureVerified;
-            game.GameLoaded += (s) => finestra.itemUpdate(game.CurrentItem);
+            game.GameLoaded += (s) => finestra.item(game.CurrentItem, interState == InterfaceState.ITEM);
             game.GameEnded += () => updateState(InterfaceState.END);
             updateState(InterfaceState.INTRO);
             // Use Debug.Print to show messages in Visual Studio's "Output" window during debugging.
@@ -155,7 +154,12 @@ namespace GadgeteerApp
             }
             if (newState != InterfaceState.STREAM)
             {
-                camera.StopStreaming();
+                camera.BitmapStreamed -= camera_StreamCamera;
+                try
+                {
+                    camera.StopStreaming();
+                }
+                catch { }
             }
             bool ledOn = false;
             switch (newState)
@@ -168,6 +172,7 @@ namespace GadgeteerApp
                     break;
                 case InterfaceState.STREAM:
                     ledOn = true;
+                    camera.BitmapStreamed += camera_StreamCamera;
                     if (camera.CameraReady)
                     {
                         try
@@ -234,7 +239,7 @@ namespace GadgeteerApp
         {
             Glide.MainWindow = introduction;
         }
-        internal void itemUpdate(Item currentItem)
+        public void item(Item currentItem, bool refresh = true)
         {
             var text = (GHI.Glide.UI.TextBlock)itempage.GetChildByName("item");
             if (currentItem != null)
@@ -242,19 +247,15 @@ namespace GadgeteerApp
                 text.Text = currentItem.Name;
                 var score = (GHI.Glide.UI.TextBlock)itempage.GetChildByName("score");
                 score.Text = currentItem.Points.ToString() + " points";
-                text.Invalidate();
-                score.Invalidate();
             }
             else
             {
                 text.Text = "Game Loading...";
             }
-            //itempage.Invalidate();
-        }
-        public void item(Item currentItem)
-        {
-            itemUpdate(currentItem);
-            Glide.MainWindow = itempage;
+            if (refresh)
+            {
+                Glide.MainWindow = itempage;
+            }
         }
         public void acquisition()
         {

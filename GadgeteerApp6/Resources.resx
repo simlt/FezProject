@@ -132,8 +132,9 @@ like the idea to try an easy challenge...
 Try our scavenger hunt game. It probably will not take too much time but, really, 
 it depends on you.
 Press the green button to start playing and good luck.
-P.S. i'm a bit old so sometimes, when you push one of my button, let me some
-time to think about it" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
+
+P.S. I'm a bit old so sometimes, when you push one of my buttons, let me some
+ time to think about it" TextAlign="Left" TextVerticalAlign="Top" Font="4" FontColor="0" BackColor="000000" ShowBackColor="False"/&gt;
   &lt;/Window&gt;
 &lt;/Glide&gt;</value>
     <comment>prima schermata con spiegazione</comment>
