@@ -20,8 +20,10 @@ namespace GadgeteerApp
 
         public delegate void GameEndedHandler();
         public event GameEndedHandler GameEnded;
+        public bool hasGameEnded = false;
 
         private IEnumerator itemEnum;
+
         public Item CurrentItem { get; private set; }
 
         public Game(WebServiceClient client)
@@ -36,6 +38,7 @@ namespace GadgeteerApp
         private void OnGameLoad(GameSession session)
         {
             GameID = session.GameID;
+            hasGameEnded = false;
             loadItems(session.items);
             Debug.Print("Game session successfully started with id: " + GameID);
         }
@@ -137,6 +140,7 @@ namespace GadgeteerApp
 
             Debug.Print("Game ended!");
             client.flushRequests();
+            hasGameEnded = true;
             GameEnded();
         }
 

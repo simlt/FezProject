@@ -5,6 +5,9 @@ using GHI.Glide;
 using Microsoft.SPOT;
 using GT = Gadgeteer;
 using GTM = Gadgeteer.Modules;
+using GHI.Pins;
+using Microsoft.SPOT.Hardware;
+using static Gadgeteer.Modules.GHIElectronics.Button;
 
 namespace GadgeteerApp
 {
@@ -25,6 +28,8 @@ namespace GadgeteerApp
         }
         private InterfaceState interState;
         private DigitalOutput ledOut;
+        private InterruptPort greenbuttonHW;
+        private OutputPort greenLED;
 
         // This method is run when the mainboard is powered up or reset.   
         void ProgramStarted()
@@ -44,7 +49,10 @@ namespace GadgeteerApp
 
             // Initialize interface
             finestra = new interfaccia();
-            button.ButtonPressed += green_button;
+            //button.ButtonPressed += green_button;
+            greenbuttonHW = new InterruptPort(FEZSpider.Socket4.Pin3, true, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeBoth);
+            greenLED = new OutputPort(FEZSpider.Socket4.Pin4, false);
+            greenbuttonHW.OnInterrupt += ButtonHW_OnInterrupt;
             button2.ButtonPressed += red_button;
             camera.BitmapStreamed += camera_StreamCamera;
             game.PictureVerified += finestra.PictureVerified;
@@ -55,12 +63,35 @@ namespace GadgeteerApp
             Debug.Print("Program Started");
         }
 
+        private void ButtonHW_OnInterrupt(uint data1, uint data2, DateTime time)
+        {
+            ButtonState state = (data2 == 0) ? ButtonState.Pressed : ButtonState.Released;
+            if (state == ButtonState.Pressed)
+            {
+                // turn button led on
+                greenLED.Write(true);
+                var timer = new GT.Timer(500, GT.Timer.BehaviorType.RunOnce);
+                timer.Tick += (t) => greenLED.Write(false);
+                timer.Start();
+            }
+            green_button(null, state);
+            if (greenbuttonHW != null)
+            {
+                greenbuttonHW.ClearInterrupt();
+            }
+        }
+
         void red_button(Gadgeteer.Modules.GHIElectronics.Button sender, Gadgeteer.Modules.GHIElectronics.Button.ButtonState state)
         {
-            if (state == Button.ButtonState.Released)
+            if (state == GTM.GHIElectronics.Button.ButtonState.Released)
                 return;
 
             Debug.Print("hai premuto il tasto rosso");
+            // turn button led on
+            sender.TurnLedOn();
+            var timer = new GT.Timer(500, GT.Timer.BehaviorType.RunOnce);
+            timer.Tick += (t) => sender.TurnLedOff();
+            timer.Start();
 
             if (finestra.msgBoxWindow != null)
             {
@@ -86,7 +117,7 @@ namespace GadgeteerApp
         }
         void green_button(GTM.GHIElectronics.Button sender, GTM.GHIElectronics.Button.ButtonState state)
         {
-            if (state == Button.ButtonState.Released)
+            if (state == GTM.GHIElectronics.Button.ButtonState.Released)
                 return;
 
             Debug.Print("hai premuto il tasto verde");
@@ -164,14 +195,13 @@ namespace GadgeteerApp
                     finestra.item(game.CurrentItem);
                     break;
                 case InterfaceState.END:
-                    finestra.endGame(game.CurrentPoints, game.CurrentPoints == game.TotalPoints);
+                    finestra.endGame(game.CurrentPoints, game.TotalPoints, game.hasGameEnded);
                     break;
             }
             ledOut.Write(ledOn);
         }
         void camera_PictureCaptured(Camera sender, GT.Picture picture)
         {
-            //interState = InterfaceState.CONFIRMED;
             this.picture = picture;
             finestra.confirm_img(picture);
         }
@@ -212,12 +242,14 @@ namespace GadgeteerApp
                 text.Text = currentItem.Name;
                 var score = (GHI.Glide.UI.TextBlock)itempage.GetChildByName("score");
                 score.Text = currentItem.Points.ToString() + " points";
+                text.Invalidate();
+                score.Invalidate();
             }
             else
             {
                 text.Text = "Game Loading...";
             }
-            itempage.Invalidate();
+            //itempage.Invalidate();
         }
         public void item(Item currentItem)
         {
@@ -281,10 +313,10 @@ namespace GadgeteerApp
             ShowMsgBox("Result", msg);
         }
 
-        internal void endGame(int score, bool allItems)
+        internal void endGame(int score, int totalScore, bool allItems)
         {
             var text = (GHI.Glide.UI.TextBlock)conclusion.GetChildByName("score");
-            text.Text = score.ToString();
+            text.Text = score.ToString() + "/" + totalScore.ToString();
             var message = (GHI.Glide.UI.TextBlock)conclusion.GetChildByName("message");
             if (allItems)
             {
