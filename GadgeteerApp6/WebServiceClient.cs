@@ -86,8 +86,19 @@ namespace GadgeteerApp
                                 }
                                 using (var resp = entry.req.GetResponse() as HttpWebResponse)
                                 {
-                                    content = entry.handler(resp);
+                                    switch (resp.StatusCode)
+                                    {
+                                        case HttpStatusCode.OK:
+                                        case HttpStatusCode.Created:
+                                            content = entry.handler(resp);
+                                            break;
+                                        default:
+                                            // Don't remove from queue the request or process its contents
+                                            continue;
+                                    }
                                 }
+                                // Remove the request if we received 
+                                m_requestCache.RemoveAt(requestIndex);
                                 // Handle the content if it is available
                                 if (entry.cHandler != null && content != null)
                                 {
@@ -96,13 +107,12 @@ namespace GadgeteerApp
                                     //entry.cHandler(content);
                                 }
 
-                                m_requestCache.RemoveAt(requestIndex);
                                 Debug.Print("RequestEntry id: " + requestIndex + " processed successfully");
                             }
                             catch (Exception)
                             {
                                 // TODO should probably remove the request (add retry counter?). Temporary using sleep to delay retries by 30s
-                                int sleepSec = 30;
+                                int sleepSec = 15;
                                 Debug.Print("RequestEntry id: " + requestIndex + " failed while network was up. Probably due to timeout or server not being reachable\nRetrying in " + sleepSec + " seconds.");
                                 Thread.Sleep(sleepSec * 1000);
                             }

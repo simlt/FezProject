@@ -28,7 +28,7 @@ namespace GadgeteerApp {
         //private Gadgeteer.Modules.GHIElectronics.Button button;
         
         /// <summary>The Button module using socket 11 of the mainboard.</summary>
-        private Gadgeteer.Modules.GHIElectronics.Button button2;
+        //private Gadgeteer.Modules.GHIElectronics.Button button2;
         
         /// <summary>The Ethernet J11D module using socket 7 of the mainboard.</summary>
         private Gadgeteer.Modules.GHIElectronics.EthernetJ11D ethernet;
@@ -62,7 +62,7 @@ namespace GadgeteerApp {
             this.displayT35 = new GTM.GHIElectronics.DisplayT35(14, 13, 12, 10);
             this.usbClientDP = new GTM.GHIElectronics.USBClientDP(1);
             //this.button = new GTM.GHIElectronics.Button(4);
-            this.button2 = new GTM.GHIElectronics.Button(11);
+            //this.button2 = new GTM.GHIElectronics.Button(11);
             this.ethernet = new GTM.GHIElectronics.EthernetJ11D(7);
             this.breakout = new GTM.GHIElectronics.Breakout(9);
         }

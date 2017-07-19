@@ -30,6 +30,8 @@ namespace GadgeteerApp
         private DigitalOutput ledOut;
         private InterruptPort greenbuttonHW;
         private OutputPort greenLED;
+        private InterruptPort redbuttonHW;
+        private OutputPort redLED;
 
         // This method is run when the mainboard is powered up or reset.   
         void ProgramStarted()
@@ -49,11 +51,14 @@ namespace GadgeteerApp
 
             // Initialize interface
             finestra = new interfaccia();
-            //button.ButtonPressed += green_button;
+
             greenbuttonHW = new InterruptPort(FEZSpider.Socket4.Pin3, true, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeBoth);
-            greenLED = new OutputPort(FEZSpider.Socket4.Pin4, false);
             greenbuttonHW.OnInterrupt += ButtonHW_OnInterrupt;
-            button2.ButtonPressed += red_button;
+            greenLED = new OutputPort(FEZSpider.Socket4.Pin4, false);
+            redbuttonHW = new InterruptPort(FEZSpider.Socket11.Pin3, true, Port.ResistorMode.PullUp, Port.InterruptMode.InterruptEdgeBoth);
+            redbuttonHW.OnInterrupt += Button2HW_OnInterrupt;
+            redLED = new OutputPort(FEZSpider.Socket11.Pin4, false);
+
             game.PictureVerified += finestra.PictureVerified;
             game.GameLoaded += (s) => finestra.item(game.CurrentItem, interState == InterfaceState.ITEM);
             game.GameEnded += () => updateState(InterfaceState.END);
@@ -69,7 +74,7 @@ namespace GadgeteerApp
             {
                 // turn button led on
                 greenLED.Write(true);
-                var timer = new GT.Timer(500, GT.Timer.BehaviorType.RunOnce);
+                var timer = new GT.Timer(1000, GT.Timer.BehaviorType.RunOnce);
                 timer.Tick += (t) => greenLED.Write(false);
                 timer.Start();
             }
@@ -80,17 +85,30 @@ namespace GadgeteerApp
             }
         }
 
+        private void Button2HW_OnInterrupt(uint data1, uint data2, DateTime time)
+        {
+            ButtonState state = (data2 == 0) ? ButtonState.Pressed : ButtonState.Released;
+            if (state == ButtonState.Pressed)
+            {
+                // turn button led on
+                redLED.Write(true);
+                var timer = new GT.Timer(1000, GT.Timer.BehaviorType.RunOnce);
+                timer.Tick += (t) => redLED.Write(false);
+                timer.Start();
+            }
+            red_button(null, state);
+            if (redbuttonHW != null)
+            {
+                redbuttonHW.ClearInterrupt();
+            }
+        }
+
         void red_button(Gadgeteer.Modules.GHIElectronics.Button sender, Gadgeteer.Modules.GHIElectronics.Button.ButtonState state)
         {
             if (state == GTM.GHIElectronics.Button.ButtonState.Released)
                 return;
 
             Debug.Print("hai premuto il tasto rosso");
-            // turn button led on
-            sender.TurnLedOn();
-            var timer = new GT.Timer(500, GT.Timer.BehaviorType.RunOnce);
-            timer.Tick += (t) => sender.TurnLedOff();
-            timer.Start();
 
             if (finestra.msgBoxWindow != null)
             {
@@ -179,19 +197,20 @@ namespace GadgeteerApp
                         {
                             //camera.CurrentPictureResolution = Camera.PictureResolution.Resolution176x144;
                             camera.StartStreaming();
-                            finestra.acquisition();
                         }
-                        catch (ArgumentException) { }
+                        catch { }
                     }
+                    finestra.acquisition();
                     break;
                 case InterfaceState.ACQUIRE:
+                    ledOn = true;
                     camera.PictureCaptured += camera_PictureCaptured;
                     //camera.CurrentPictureResolution = Camera.PictureResolution.Resolution320x240;
                     try
                     {
                         camera.TakePicture();
                     }
-                    catch (ArgumentException) { }
+                    catch { }
                     break;
                 case InterfaceState.CONFIRMED:
                     interState = InterfaceState.ITEM;
@@ -264,7 +283,7 @@ namespace GadgeteerApp
         public void acquisitionUpdate(Bitmap bmp)
         {
             streamImage.Bitmap = bmp;
-            getting_picture.Invalidate();
+            streamImage.Invalidate();
         }
         public void confirm_img(GT.Picture picture)
         {
