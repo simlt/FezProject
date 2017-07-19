@@ -270,6 +270,8 @@ namespace GadgeteerApp
             else
             {
                 text.Text = "Game Loading...";
+                var score = (GHI.Glide.UI.TextBlock)itempage.GetChildByName("score");
+                score.Text = "";
             }
             if (refresh)
             {

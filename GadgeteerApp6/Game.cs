@@ -123,6 +123,7 @@ namespace GadgeteerApp
             client.flushRequests();
             // Request new Game
             client.createGame(g => GameLoaded(g));
+            CurrentItem = null;
         }
 
         internal void end()
